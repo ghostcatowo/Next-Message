@@ -1,7 +1,7 @@
 import { extension_settings, getContext } from '../../../extensions.js';
 import { saveSettingsDebounced, eventSource, event_types } from '../../../../script.js';
 
-const MODULE = 'next_message';
+const MODULE = 'next_turn';
 const DEFAULT_PROMPT = `(OOC: There is no new IC input from the user this turn. Continue the narrative naturally from the character's last response. Do not repeat or summarize the previous user input or character response.)`;
 const POSITIONS = ['end', 'before_prefill', 'after_char'];
 const CLICK_TIMEOUT_MS = 10000;
@@ -104,7 +104,7 @@ function renderText() {
 }
 
 function renderLog() {
-    const el = document.getElementById('nm_log_text');
+    const el = document.getElementById('nt_log_text');
     if (!el) return;
     el.value = logEntries.length ? renderText() : '아직 기록이 없습니다.';
     el.scrollTop = el.scrollHeight;
@@ -164,7 +164,7 @@ async function copyLog() {
         return;
     } catch (e) { /* 선택 복사로 대체 */ }
     try {
-        const el = document.getElementById('nm_log_text');
+        const el = document.getElementById('nt_log_text');
         el.focus();
         el.select();
         el.setSelectionRange(0, el.value.length);
@@ -187,7 +187,7 @@ function stackHead(err, count = 3) {
 }
 
 function reportError(err, what = '알 수 없는 단계') {
-    console.error('[Next Message]', err);
+    console.error('[Next Turn]', err);
     const name = err && err.name ? err.name : 'Error';
     const msg = err && err.message ? err.message : String(err);
     log(`! 오류: ${what} 중 문제 발생 → ${name}: ${msg}`);
@@ -496,18 +496,18 @@ function listen(name, fn) {
 
 /* ---------- 설정 UI ---------- */
 function updateStatus() {
-    const el = document.getElementById('nm_status');
+    const el = document.getElementById('nt_status');
     if (!el) return;
     const s = settings();
     const hasPrompt = !!String(s.prompt || '').trim();
-    let state = 'nm-off';                              // 빨강: 꺼짐
-    if (s.enabled) state = hasPrompt ? 'nm-on' : 'nm-warn';   // 초록: 주입함 / 노랑: 켜져 있지만 프롬프트가 비어 주입 안 됨
-    el.classList.remove('nm-on', 'nm-warn', 'nm-off');
+    let state = 'nt-off';                              // 빨강: 꺼짐
+    if (s.enabled) state = hasPrompt ? 'nt-on' : 'nt-warn';   // 초록: 주입함 / 노랑: 켜져 있지만 프롬프트가 비어 주입 안 됨
+    el.classList.remove('nt-on', 'nt-warn', 'nt-off');
     el.classList.add(state);
 }
 
 function renderPresets() {
-    const sel = document.getElementById('nm_preset');
+    const sel = document.getElementById('nt_preset');
     if (!sel) return;
     const s = settings();
     sel.innerHTML = '';
@@ -523,86 +523,86 @@ function renderPresets() {
 }
 
 function buildUI() {
-    if (document.querySelector('.nm-settings')) return;
+    if (document.querySelector('.nt-settings')) return;
     cleanPresets();
     const s = settings();
     const html = `
-<div class="nm-settings inline-drawer">
+<div class="nt-settings inline-drawer">
     <div class="inline-drawer-toggle inline-drawer-header">
-        <b>➡️ Next Message</b>
-        <span id="nm_status" class="nm-status"></span>
+        <b>➡️ Next Turn</b>
+        <span id="nt_status" class="nt-status"></span>
         <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
     </div>
     <div class="inline-drawer-content">
-        <label class="checkbox_label nm-check" for="nm_enabled">
-            <input type="checkbox" id="nm_enabled">
+        <label class="checkbox_label nt-check" for="nt_enabled">
+            <input type="checkbox" id="nt_enabled">
             <span>활성화</span>
         </label>
-        <div class="nm-preset-row">
-            <select id="nm_preset" class="text_pole nm-select" aria-label="저장한 프롬프트 선택"></select>
-            <div id="nm_save" class="menu_button nm-icon-btn" title="프롬프트 저장" aria-label="프롬프트 저장"><i class="fa-solid fa-floppy-disk"></i></div>
-            <div id="nm_delete" class="menu_button nm-icon-btn" title="선택한 프롬프트 삭제" aria-label="선택한 프롬프트 삭제"><i class="fa-solid fa-trash"></i></div>
+        <div class="nt-preset-row">
+            <select id="nt_preset" class="text_pole nt-select" aria-label="저장한 프롬프트 선택"></select>
+            <div id="nt_save" class="menu_button nt-icon-btn" title="프롬프트 저장" aria-label="프롬프트 저장"><i class="fa-solid fa-floppy-disk"></i></div>
+            <div id="nt_delete" class="menu_button nt-icon-btn" title="선택한 프롬프트 삭제" aria-label="선택한 프롬프트 삭제"><i class="fa-solid fa-trash"></i></div>
         </div>
-        <textarea id="nm_prompt" class="text_pole nm-prompt" placeholder="빈 입력을 대체할 프롬프트를 넣어주세요."></textarea>
-        <div class="nm-position-row">
-            <label for="nm_position">주입 위치</label>
-            <select id="nm_position" class="text_pole nm-select">
+        <textarea id="nt_prompt" class="text_pole nt-prompt" placeholder="빈 입력을 대체할 프롬프트를 넣어주세요."></textarea>
+        <div class="nt-position-row">
+            <label for="nt_position">주입 위치</label>
+            <select id="nt_position" class="text_pole nt-select">
                 <option value="end">맨 끝</option>
                 <option value="before_prefill">프리필 앞</option>
                 <option value="after_char">캐릭터 메세지 뒤</option>
             </select>
         </div>
-        <div class="nm-icon-row">
-            <div id="nm_reset" class="menu_button nm-icon-btn" title="기본값 복원" aria-label="기본값 복원"><i class="fa-solid fa-rotate-left"></i><span>기본값</span></div>
-            <div id="nm_log_btn" class="menu_button nm-icon-btn" title="실행 기록" aria-label="실행 기록"><i class="fa-solid fa-clipboard-list"></i><span>실행 기록</span></div>
+        <div class="nt-icon-row">
+            <div id="nt_reset" class="menu_button nt-icon-btn" title="기본값 복원" aria-label="기본값 복원"><i class="fa-solid fa-rotate-left"></i><span>기본값</span></div>
+            <div id="nt_log_btn" class="menu_button nt-icon-btn" title="실행 기록" aria-label="실행 기록"><i class="fa-solid fa-clipboard-list"></i><span>실행 기록</span></div>
         </div>
-        <div id="nm_log_wrap" class="nm-log-wrap">
-            <textarea id="nm_log_text" class="text_pole nm-log" readonly></textarea>
-            <div class="nm-icon-row">
-                <div id="nm_copy" class="menu_button nm-icon-btn" title="복사" aria-label="복사"><i class="fa-solid fa-copy"></i><span>복사</span></div>
-                <div id="nm_clear" class="menu_button nm-icon-btn" title="기록 지우기" aria-label="기록 지우기"><i class="fa-solid fa-eraser"></i><span>지우기</span></div>
+        <div id="nt_log_wrap" class="nt-log-wrap">
+            <textarea id="nt_log_text" class="text_pole nt-log" readonly></textarea>
+            <div class="nt-icon-row">
+                <div id="nt_copy" class="menu_button nt-icon-btn" title="복사" aria-label="복사"><i class="fa-solid fa-copy"></i><span>복사</span></div>
+                <div id="nt_clear" class="menu_button nt-icon-btn" title="기록 지우기" aria-label="기록 지우기"><i class="fa-solid fa-eraser"></i><span>지우기</span></div>
             </div>
         </div>
     </div>
 </div>`;
     const container = document.getElementById('extensions_settings2') || document.getElementById('extensions_settings');
     if (!container) {
-        console.warn('[Next Message] 확장 설정 영역을 찾지 못해 UI를 추가하지 못했습니다.');
+        console.warn('[Next Turn] 확장 설정 영역을 찾지 못해 UI를 추가하지 못했습니다.');
         return;
     }
     $(container).append(html);
 
-    $('#nm_enabled').prop('checked', !!s.enabled).on('change', function () {
+    $('#nt_enabled').prop('checked', !!s.enabled).on('change', function () {
         settings().enabled = $(this).prop('checked');
         saveSettingsDebounced();
         updateStatus();
     });
-    $('#nm_position').val(s.position).on('change', function () {
+    $('#nt_position').val(s.position).on('change', function () {
         const v = String($(this).val());
         settings().position = POSITIONS.includes(v) ? v : 'before_prefill';
         saveSettingsDebounced();
     });
-    $('#nm_prompt').val(s.prompt).on('input', function () {
+    $('#nt_prompt').val(s.prompt).on('input', function () {
         settings().prompt = String($(this).val());
         saveSettingsDebounced();
         updateStatus();
     });
-    $('#nm_reset').on('click', () => {
+    $('#nt_reset').on('click', () => {
         settings().prompt = DEFAULT_PROMPT;
         settings().activePreset = '';
-        $('#nm_prompt').val(DEFAULT_PROMPT);
+        $('#nt_prompt').val(DEFAULT_PROMPT);
         renderPresets();
         saveSettingsDebounced();
         updateStatus();
     });
-    $('#nm_preset').on('change', function () {
+    $('#nt_preset').on('change', function () {
         applyPreset(String($(this).val()));
-        $('#nm_prompt').val(settings().prompt);
+        $('#nt_prompt').val(settings().prompt);
         saveSettingsDebounced();
         updateStatus();
     });
-    $('#nm_save').on('click', () => {
-        const text = String($('#nm_prompt').val()).trim();
+    $('#nt_save').on('click', () => {
+        const text = String($('#nt_prompt').val()).trim();
         if (!text) {
             toastr.warning('프롬프트가 비어 있어서 저장할 수 없습니다.');
             return;
@@ -623,7 +623,7 @@ function buildUI() {
         saveSettingsDebounced();
         toastr.success(`'${name}' 저장했습니다.`);
     });
-    $('#nm_delete').on('click', () => {
+    $('#nt_delete').on('click', () => {
         const s = settings();
         const active = s.presets.find((p) => p.id === s.activePreset);
         if (!active) {
@@ -636,13 +636,13 @@ function buildUI() {
         saveSettingsDebounced();
         toastr.success('삭제했습니다.');
     });
-    $('#nm_log_btn').on('click', () => {
+    $('#nt_log_btn').on('click', () => {
         logOpen = !logOpen;
-        $('#nm_log_wrap').toggle(logOpen);
+        $('#nt_log_wrap').toggle(logOpen);
         if (logOpen) renderLog();
     });
-    $('#nm_copy').on('click', copyLog);
-    $('#nm_clear').on('click', () => {
+    $('#nt_copy').on('click', copyLog);
+    $('#nt_clear').on('click', () => {
         logEntries.length = 0;
         activeEntry = null;
         clickEntry = null;
@@ -669,6 +669,6 @@ jQuery(() => {
 
         logNote('확장 로드 완료');
     } catch (err) {
-        console.error('[Next Message] 로드 실패', err);
+        console.error('[Next Turn] 로드 실패', err);
     }
 });

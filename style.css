@@ -1,9 +1,9 @@
-/* Next Message 설정 패널
+/* Next Turn 설정 패널
  * 주의: .inline-drawer-content 의 display는 건드리지 않는다. (접기/펼치기는 SillyTavern이 제어)
  */
 
 /* ---------------- 헤더 신호등 (초록=켜짐, 노랑=프롬프트 없음, 빨강=꺼짐) ---------------- */
-.nm-settings .nm-status {
+.nt-settings .nt-status {
     flex: 0 0 auto;
     width: 11px;
     height: 11px;
@@ -13,12 +13,12 @@
     background: #e5534b;
 }
 
-.nm-settings .nm-status.nm-on   { background: #3fb950; }
-.nm-settings .nm-status.nm-warn { background: #e3b341; }
-.nm-settings .nm-status.nm-off  { background: #e5534b; }
+.nt-settings .nt-status.nt-on   { background: #3fb950; }
+.nt-settings .nt-status.nt-warn { background: #e3b341; }
+.nt-settings .nt-status.nt-off  { background: #e5534b; }
 
 /* 주입 위치 */
-.nm-settings .nm-position-row {
+.nt-settings .nt-position-row {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -26,13 +26,13 @@
     margin: 8px 0;
 }
 
-.nm-settings .nm-position-row label {
+.nt-settings .nt-position-row label {
     flex: 0 0 auto;
     font-size: 0.9em;
     white-space: nowrap;
 }
 
-.nm-settings .nm-position-row select.nm-select {
+.nt-settings .nt-position-row select.nt-select {
     flex: 1 1 auto;
     width: auto;
     min-width: 0;
@@ -40,7 +40,7 @@
 }
 
 /* 선택 목록 + 저장/삭제 아이콘 한 줄 */
-.nm-settings .nm-preset-row {
+.nt-settings .nt-preset-row {
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
@@ -49,7 +49,7 @@
     margin: 8px 0 4px;
 }
 
-.nm-settings .nm-preset-row select.nm-select {
+.nt-settings .nt-preset-row select.nt-select {
     flex: 1 1 auto;
     width: auto;
     min-width: 0;
@@ -57,7 +57,7 @@
 }
 
 /* ---------------- 체크박스 ---------------- */
-.nm-settings .nm-check {
+.nt-settings .nt-check {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -65,13 +65,13 @@
     word-break: keep-all;
 }
 
-.nm-settings .nm-check span {
+.nt-settings .nt-check span {
     white-space: normal;
 }
 
 /* ---------------- 입력칸 (프롬프트 / 기록) ---------------- */
-.nm-settings textarea.nm-prompt,
-.nm-settings textarea.nm-log {
+.nt-settings textarea.nt-prompt,
+.nt-settings textarea.nt-log {
     display: block;
     width: 100% !important;
     max-width: 100% !important;
@@ -82,14 +82,14 @@
     resize: vertical;
 }
 
-.nm-settings textarea.nm-prompt {
+.nt-settings textarea.nt-prompt {
     min-height: 8em;
     line-height: 1.5;
     word-break: keep-all;
     overflow-wrap: anywhere;
 }
 
-.nm-settings textarea.nm-log {
+.nt-settings textarea.nt-log {
     min-height: 14em;
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     font-size: 0.8em;
@@ -99,7 +99,7 @@
 }
 
 /* ---------------- 아이콘 버튼 (가로 배치) ---------------- */
-.nm-settings .nm-icon-row {
+.nt-settings .nt-icon-row {
     display: flex !important;
     flex-direction: row !important;
     flex-wrap: wrap !important;
@@ -109,7 +109,7 @@
     margin: 8px 0;
 }
 
-.nm-settings .nm-icon-btn {
+.nt-settings .nt-icon-btn {
     flex: 0 0 auto !important;
     display: inline-flex !important;
     flex-direction: row !important;
@@ -124,17 +124,17 @@
     cursor: pointer;
 }
 
-.nm-settings .nm-icon-btn i {
+.nt-settings .nt-icon-btn i {
     margin: 0;
     line-height: 1;
 }
 
-.nm-settings .nm-icon-btn span {
+.nt-settings .nt-icon-btn span {
     font-size: 0.88em;
 }
 
 /* ---------------- 실행 기록 패널 (처음엔 숨김, JS가 열고 닫음) ---------------- */
-.nm-settings .nm-log-wrap {
+.nt-settings .nt-log-wrap {
     display: none;
     width: 100%;
     margin: 6px 0;

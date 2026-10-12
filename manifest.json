@@ -1,5 +1,5 @@
 {
-    "display_name": "➡️ Next Message",
+    "display_name": "➡️ Next Turn",
     "loading_order": 100,
     "js": "index.js",
     "css": "style.css",
